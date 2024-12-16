@@ -1,36 +1,34 @@
+import { StatusBar } from "expo-status-bar";
 import Checkbox from "expo-checkbox";
 import { useState } from "react";
 import { Link } from "expo-router";
+import Input from "../components/Input";
 import {
   StyleSheet,
   Text,
   View,
   TextInput,
-  TouchableOpacity,
-  StatusBar,
-  modalVisible,
   Pressable,
+  onPress,
   Modal,
   Alert,
-  SaveAreaView,
   Image,
 } from "react-native";
 import Button from "../components/Button";
-// import HelloWorld from './components/HelloWorld';
-import Input from "../components/Input";
-import { useNavigation } from "@react-navigation/native";
+import { useRouter } from "expo-router";
 
 export default function App() {
-  const navigation = useNavigation();
+  const router = useRouter();
   const [isChecked, setChecked] = useState(false);
-  const [modalVisible, setModalVisible] = useState(false);
+  // const [modalVisible, setModalVisible] = useState(false);
   const handleRegister = () => {
-    navigation.navigate("index");
+    router.push("/"); // Navigasi ke halaman "index" atau halaman login
   };
+
   return (
     <View style={styles.container}>
       {/* <SafeAreaView style={styles.centeredView}> */}
-        {/* <Modal
+      {/* <Modal
           animationType="slide"
           transparent={true}
           visible={modalVisible}
@@ -71,6 +69,7 @@ Versions of the Lorem ipsum text have been used in typesetting at least since th
         style={styles.input}
         placeholder="Email"
         placeholderTextColor="#aaa"
+        secureTextEntry={false}
         keyboardType="email-address"
       />
 
@@ -84,7 +83,7 @@ Versions of the Lorem ipsum text have been used in typesetting at least since th
         style={styles.input}
         placeholder="Avatar URL"
         placeholderTextColor="#aaa"
-        secureTextEntry={true}
+        secureTextEntry={false}
         keyboardType="url"
       />
       <View style={styles.tnc}>
@@ -97,9 +96,7 @@ Versions of the Lorem ipsum text have been used in typesetting at least since th
         <Text style={styles.checkbox}>
           I have read and agree to the{" "}
           <Link href="/tnc">
-            <Text style={{color:'#19918F'}}>
-            Terms and Conditions
-            </Text>
+            <Text style={{ color: "#19918F" }}>Terms and Conditions</Text>
           </Link>
         </Text>
       </View>
@@ -113,7 +110,7 @@ Versions of the Lorem ipsum text have been used in typesetting at least since th
       </Text>
 
       <StatusBar style="auto" hidden />
-     </View>
+    </View>
   );
 }
 
@@ -141,19 +138,19 @@ const styles = StyleSheet.create({
   },
   modalView: {
     margin: 20,
-    backgroundColor: 'white',
+    backgroundColor: "white",
     borderRadius: 20,
     // padding: 5,
-    alignItems: 'center',
-    shadowColor: '#000',
+    alignItems: "center",
+    shadowColor: "#000",
     shadowOffset: {
-    width: 0,
-    height: 2,
+      width: 0,
+      height: 2,
     },
     shadowOpacity: 0.25,
     shadowRadius: 4,
     elevation: 5,
-    },
+  },
   input: {
     width: "100%",
     height: 50,
@@ -178,7 +175,7 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     fontSize: 14,
   },
-  popup:{
+  popup: {
     backgroundColor: "#ffff",
     alignItems: "center",
     justifyContent: "center",
@@ -194,5 +191,4 @@ const styles = StyleSheet.create({
   textStyle: {
     padding: 16,
   },
-}
-);
+});

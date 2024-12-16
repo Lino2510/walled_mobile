@@ -1,5 +1,8 @@
 // import { StatusBar } from 'expo-status-bar';
 // import { StyleSheet, Text, View } from 'react-native';
+// // import HelloWorld from './components/HelloWorld';
+// import Input from "../components/Input";
+// import { useNavigation } from "@react-navigation/native";
 
 // export default function App() {
 //   return (
@@ -34,23 +37,21 @@
 // });
 
 import { StatusBar } from "expo-status-bar";
-import { Link, router } from "expo-router";
+import { Link, useNavigation, useRouter } from "expo-router";
 import {
   StyleSheet,
   Text,
   View,
   TextInput,
+  onPress,
   TouchableOpacity,
   Image,
 } from "react-native";
 import Button from "../components/Button";
-// import HelloWorld from './components/HelloWorld';
-import Input from "../components/Input";
-import { useNavigation } from "@react-navigation/native";
 import { z } from "zod";
 import { useState } from "react";
 import axios from "axios";
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const LoginSchema = z.object({
   email: z.string().email({ message: "Invalid email address" }),
@@ -58,16 +59,19 @@ const LoginSchema = z.object({
 });
 
 export default function App() {
-  const [form, setForm] = useState({});
+  const [form, setForm] = useState({ email: "", password: "" });
   const [errorMsg, setErrors] = useState({});
   const [serverError, setServerError] = useState(" ");
-  console.log(form);
-  const router = replace();
+  const router = useRouter();
 
   const handleInputChange = (key, value) => {
     setForm({ ...form, [key]: value });
-    setErrors({ ...errorMsg, [key]: "" });
-  }
+    try {
+      LoginSchema.pick({ [key]: true }).parse({ [key]: value });
+      setErrors((prev) => ({ ...prev, [key]: "" }));
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, [key]: err.errors[0].message }));
+    }
   };
 
   const handleSubmit = async () => {
@@ -79,7 +83,7 @@ export default function App() {
         form
       );
       await AsyncStorage.setItem("token", res.data.data.token);
-      router.replace("/(home)")
+      router.replace("/(home)");
     } catch (err) {
       if (axios.isAxiosError(err)) {
         if (err.response) {
@@ -103,7 +107,55 @@ export default function App() {
         console.error("Unhandled Error:", err);
       }
     }
-  }
+  };
+
+  return (
+    <View style={styles.container}>
+      {serverError && <Text>{serverError}</Text>}
+      <Image
+        source={require("../assets/walled_logo.png")}
+        style={styles.logo}
+        resizeMode="stretch"
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder="Email"
+        placeholderTextColor="#aaa"
+        keyboardType="email-address"
+        onChangeText={(text) => handleInputChange("email", text)}
+      />
+
+      {errorMsg.email ? (
+        <Text style={styles.errorMsg}>{errorMsg.email}</Text>
+      ) : null}
+
+      <TextInput
+        style={styles.inputpw}
+        placeholder="Password"
+        placeholderTextColor="#aaa"
+        secureTextEntry={true}
+        onChangeText={(text) => handleInputChange("password", text)}
+        value={form.password}
+      />
+
+      {errorMsg.password ? (
+        <Text style={styles.errorMsg}>{errorMsg.password}</Text>
+      ) : null}
+
+      {/* <Link href="/(home)" style={styles.linkText}>Masuk</Link> */}
+      <Button onPress={handleSubmit} text="Login" />
+      <Text style={{ alignSelf: "flex-start", padding: 10 }}>
+        Don't have account? {""}
+        <Link href="/register" style={styles.rgs}>
+          Register here
+        </Link>
+      </Text>
+
+      <StatusBar style="auto" hidden />
+    </View>
+  );
+}
 
 const styles = StyleSheet.create({
   container: {
@@ -134,6 +186,18 @@ const styles = StyleSheet.create({
     backgroundColor: "#f9f9f9",
     fontSize: 16,
   },
+  inputpw: {
+    width: "100%",
+    height: 50,
+    borderColor: "#ddd",
+    borderWidth: 1,
+    borderRadius: 15,
+    paddingHorizontal: 10,
+    marginTop: 15,
+    marginBottom: 20,
+    backgroundColor: "#f9f9f9",
+    fontSize: 16,
+  },
   rgs: {
     color: "#19918F",
   },
@@ -145,7 +209,6 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
   },
-
   errorMsg: {
     color: "red",
     width: "100%",
