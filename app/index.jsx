@@ -34,7 +34,7 @@
 // });
 
 import { StatusBar } from "expo-status-bar";
-import { Link } from "expo-router";
+import { Link, router } from "expo-router";
 import {
   StyleSheet,
   Text,
@@ -47,57 +47,63 @@ import Button from "../components/Button";
 // import HelloWorld from './components/HelloWorld';
 import Input from "../components/Input";
 import { useNavigation } from "@react-navigation/native";
+import { z } from "zod";
+import { useState } from "react";
+import axios from "axios";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+const LoginSchema = z.object({
+  email: z.string().email({ message: "Invalid email address" }),
+  password: z.string().min(6, { message: "Must be 6 or more characters long" }),
+});
 
 export default function App() {
-  const navigation = useNavigation();
-  const handleRegister = () => {
-    navigation.navigate("(home)");
+  const [form, setForm] = useState({});
+  const [errorMsg, setErrors] = useState({});
+  const [serverError, setServerError] = useState(" ");
+  console.log(form);
+  const router = replace();
+
+  const handleInputChange = (key, value) => {
+    setForm({ ...form, [key]: value });
+    setErrors({ ...errorMsg, [key]: "" });
+  }
   };
-  return (
-    <View style={styles.container}>
-      <Image
-        source={require("../assets/walled_logo.png")}
-        style={styles.logo}
-        resizeMode="stretch"
-      />
 
-      {/* <Text>Nyoba aja</Text> */}
+  const handleSubmit = async () => {
+    try {
+      LoginSchema.parse(form);
 
-      {/* <HelloWorld/> */}
-      <TextInput
-        style={styles.input}
-        placeholder="Email"
-        placeholderTextColor="#aaa"
-        keyboardType="email-address"
-      />
-
-      <TextInput
-        style={styles.input}
-        placeholder="Password"
-        placeholderTextColor="#aaa"
-        secureTextEntry={true}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Nomer Rekening"
-        placeholderTextColor="#aaa"
-        secureTextEntry={true}
-        keyboardType="number-pad"
-      />
-      <Input text="Notes" />
-      {/* <Link href = "/(home)">Homescreen</Link> */}
-      <Button bgColor="#19918F" text="Login" onPress={handleRegister} />
-      <Text style={styles.blmrgs}>
-        Don't have account?{" "}
-        <Link style={styles.rgs} href="/register">
-          Register here
-        </Link>
-      </Text>
-
-      <StatusBar style="auto" hidden />
-    </View>
-  );
-}
+      const res = await axios.post(
+        "https://6776-182-3-53-7.ngrok-free.app/auth/login",
+        form
+      );
+      await AsyncStorage.setItem("token", res.data.data.token);
+      router.replace("/(home)")
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        if (err.response) {
+          setServerError(err.response.data.message || "An error occurred");
+        } else if (err.request) {
+          setServerError("Network error. Please try again later.");
+          console.error("Network Error:", err.request);
+        } else {
+          setServerError("An unexpected error occurred.");
+          console.error("Request Setup Error:", err.message);
+        }
+      } else if (err?.errors) {
+        const errors = {};
+        err.errors.forEach((item) => {
+          const key = item.path[0];
+          errors[key] = item.message;
+        });
+        setErrors(errors);
+      } else {
+        setServerError("An unknown error occurred.");
+        console.error("Unhandled Error:", err);
+      }
+    }
+  }
 
 const styles = StyleSheet.create({
   container: {
@@ -124,7 +130,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 15,
     paddingHorizontal: 10,
-    marginBottom: 15,
+    marginTop: 15,
     backgroundColor: "#f9f9f9",
     fontSize: 16,
   },
@@ -138,5 +144,10 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 24,
     fontWeight: "bold",
+  },
+
+  errorMsg: {
+    color: "red",
+    width: "100%",
   },
 });

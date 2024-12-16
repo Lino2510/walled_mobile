@@ -13,9 +13,10 @@ export default function Layout() {
         },
       }}>
       {/* Optionally configure static options outside the route.*/}
-      <Stack.Screen name="home" options={{}} />
+      <Stack.Screen name="(home)" options={{headerShown: false}} />
       <Stack.Screen name="register" options={{headerShown: false }} />
       <Stack.Screen name="index" options={{headerShown: false }} />
+      <Stack.Screen name="tnc" options={{presentation: "modal", title: "Terms and Conditions" }} />
     </Stack>
   );
 }
