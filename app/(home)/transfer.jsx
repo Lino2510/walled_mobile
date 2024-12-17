@@ -20,7 +20,7 @@ export default function Transfer() {
         <TextInput
           style={{ fontSize: 18 }}
           keyboardType="number-pad"
-          placeholder="insert account number"
+          placeholder="insert  number"
           placeholderTextColor={"#fff"}
           color={"#fff"}
         />

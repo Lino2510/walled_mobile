@@ -79,7 +79,7 @@ export default function App() {
       LoginSchema.parse(form);
 
       const res = await axios.post(
-        "https://6776-182-3-53-7.ngrok-free.app/auth/login",
+        "https://walled-api.vercel.app/auth/login",
         form
       );
       await AsyncStorage.setItem("token", res.data.data.token);
@@ -143,7 +143,9 @@ export default function App() {
         <Text style={styles.errorMsg}>{errorMsg.password}</Text>
       ) : null}
 
-      {/* <Link href="/(home)" style={styles.linkText}>Masuk</Link> */}
+      <Link href="/(home)" style={styles.linkText}>
+        Masuk
+      </Link>
       <Button onPress={handleSubmit} text="Login" />
       <Text style={{ alignSelf: "flex-start", padding: 10 }}>
         Don't have account? {""}

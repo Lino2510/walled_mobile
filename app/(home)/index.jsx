@@ -1,47 +1,3 @@
-// function LogoTitle() {
-//   return (
-//     <Image
-//       style={styles.image}
-//       source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
-//     />
-//   );
-// }
-
-// export default function Home() {
-//   return (
-//     <View style={styles.container}>
-//       {/* <Stack.Screen
-//         options={{
-//           title: 'My home',
-//           headerStyle: { backgroundColor: '#1998F' },
-//           headerTintColor: '#fff',
-//           headerTitleStyle: {
-//             fontWeight: 'bold',
-//           },
-
-//           headerTitle: props => <LogoTitle.png {...props} />,
-//         }}
-//       /> */}
-//       <Text>Home Screen</Text>
-//       {/* <Link href={{ pathname: "details", params: { name: "Bacon" } }}>
-//         Go to Details
-//       </Link> */}
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     alignItems: "center",
-//     justifyContent: "center",
-//   },
-//   image: {
-//     width: 50,
-//     height: 50,
-//   },
-// });
-
 import { Link, Stack } from "expo-router";
 import {
   Image,
@@ -57,12 +13,22 @@ import React, { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 
-function LogoTitle() {
+function LogoTitle({ avatar }) {
+  const [isAvatarActive, setIsAvatarActive] = useState(false);
+
   return (
-    <Image
-      style={styles.image}
-      source={{ uri: "https://reactnative.dev/img/tiny_logo.png" }}
-    />
+    <TouchableOpacity
+      style={[
+        styles.avatarContainer,
+        { borderColor: isAvatarActive ? "#4cc4c2" : "#19918F" },
+      ]}
+      onPress={() => setIsAvatarActive((prev) => !prev)}
+      activeOpacity={0.8}
+    >
+      {/* Konten di dalam TouchableOpacity, misalnya gambar */}
+
+      <Image style={styles.image} source={{ uri: avatar }} />
+    </TouchableOpacity>
   );
 }
 
@@ -74,15 +40,13 @@ export default function Home() {
       try {
         const value = await AsyncStorage.getItem("token");
         if (value !== null) {
-          const res = await axios.get(
-            "https://6776-182-3-53-7.ngrok-free.app/profile",
-            {
-              headers: {
-                Authorization: `Bearer ${value}`,
-              },
-            }
-          );
+          const res = await axios.get("https://walled-api.vercel.app/profile", {
+            headers: {
+              Authorization: `Bearer ${value}`,
+            },
+          });
           const user = res.data.data;
+
           setUser(user);
         }
       } catch (e) {
@@ -97,21 +61,32 @@ export default function Home() {
     //   <Text>Home Screen</Text>
     <ScrollView containerStyle={styles.container}>
       <View style={styles.header}>
-        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <Image
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 15 }}>
+          <LogoTitle avatar={user?.avatar_url} />
+          {/* <Image
             source={require("../../assets/avatar.png")}
             style={{ width: 50, height: 50 }}
-          />
+          /> */}
           <View>
-            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-              {user.fullname}
-            </Text>
+            {user?.fullname && (
+              <Text
+                style={{
+                  fontSize: 18,
+                  fontWeight: "bold",
+                  marginTop: 20,
+                  textAlign: "center",
+                }}
+              >
+                {user.fullname}
+              </Text>
+            )}
+
             <Text style={{ fontSize: 18 }}>{user.typeofaccount}</Text>
           </View>
         </View>
         <Image source={require("../../assets/suntoggle.png")} />
       </View>
-      <View style={{ backgroundColor: "#FAFBFD", paddingHorizontal: 20 }}>
+      <View style={{ backgroundColor: "#FAFBFD", paddingHorizontal: 23 }}>
         <View
           style={{
             flexDirection: "row",
@@ -121,10 +96,15 @@ export default function Home() {
           }}
         >
           <View style={{ width: "70%" }}>
-            <Text style={{ fontSize: 22, fontWeight: "bold", marginBottom: 8 }}>
-              Good Morning, {user.fullname.split(" ")[0]}
-            </Text>
-            <Text style={{ fontSize: 18 }}>
+            {user?.fullname && (
+              <Text
+                style={{ fontSize: 22, fontWeight: "bold", marginBottom: 8 }}
+              >
+                Good Morning, {user?.fullname}
+              </Text>
+            )}
+
+            <Text style={{ fontSize: 17 }}>
               Check all your incoming and outgoing transactions here
             </Text>
           </View>
@@ -137,16 +117,28 @@ export default function Home() {
         <View style={styles.accountnumber}>
           <Text style={{ color: "#fff", fontSize: 18 }}>Account No.</Text>
           <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 18 }}>
-            {user.accountnumber}
+            {user.wallet?.account_number}
           </Text>
         </View>
 
         <View style={styles.balancebox}>
           <View>
             <Text style={{ fontSize: 20 }}>Balance</Text>
-            <Text style={{ fontSize: 24, fontWeight: "bold" }}>
-              Rp {user.balance}
-            </Text>
+            <View style={{ gap: 2 }}>
+              <Text style={{ fontSize: 22, fontWeight: "bold" }}>
+                {showBalance
+                  ? `Rp ${user.wallet?.balance.toLocaleString("id-ID")}`
+                  : "Rp ****"}
+                <TouchableOpacity
+                  onPress={() => setShowBalance((prev) => !prev)}
+                >
+                  <Image
+                    source={require("../../assets/view.png")}
+                    style={{ width: 18, height: 18, marginLeft: 10 }}
+                  />
+                </TouchableOpacity>
+              </Text>
+            </View>
           </View>
           <View>
             <View style={{ gap: 20 }}>
@@ -232,12 +224,12 @@ export default function Home() {
   );
 }
 
-const user = {
-  fullname: "John Doe",
-  typeofaccount: "Personal Account",
-  accountnumber: "123456789",
-  balance: "10.000.000",
-};
+// const user = {
+//   fullname: "John Doe",
+//   typeofaccount: "Personal Account",
+//   accountnumber: "123456789",
+//   balance: "10.000.000",
+// };
 
 const transactions = [
   {
@@ -292,7 +284,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingTop: 40,
+    paddingTop: 15,
     paddingBottom: 12,
     backgroundColor: "#fff",
   },
@@ -302,5 +294,15 @@ const styles = StyleSheet.create({
   image: {
     width: 50,
     height: 50,
+    borderRadius: 9999,
+  },
+  avatarContainer: {
+    width: 54, // Lebih besar sedikit dari gambar agar border terlihat
+    height: 54,
+    borderWidth: 3, // Lebar border luar
+    borderColor: "#19918F", // Warna border luar
+    borderRadius: 9999, // Membuat border menjadi lingkaran
+    justifyContent: "center",
+    alignItems: "center",
   },
 });
