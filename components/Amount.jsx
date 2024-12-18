@@ -1,4 +1,5 @@
 import { View, StyleSheet, TextInput, Text } from "react-native";
+import { useState, useEffect } from "react";
 
 
 const styles = StyleSheet.create({
@@ -13,13 +14,20 @@ const styles = StyleSheet.create({
     money: { flexDirection: 'row', borderBottomColor: '#b3b3b3', borderBottomWidth: 0.5 },
     idr: { fontSize: 16, marginRight: 12, marginTop: 12 }
 });
-export default function Amount({balance = 0, showBalance = false, marginTop=0, marginBottom=0 }) {
+    export default function Amount({
+        balance = 0,
+        showBalance = false,
+        marginTop = 0,
+        marginBottom = 0,
+        value,
+        setValue,
+ }) {
     return (
         <View style={{...styles.container, marginTop: marginTop, marginBottom: marginBottom }}>
             <Text style={{ color: '#b3b3b3' }}>Amount</Text>
             <View style={styles.money}>
                 <Text style={styles.idr}>IDR</Text>
-                <TextInput style={styles.input} placeholder="100.000" keyboardType="number-pad"/>
+                <TextInput style={styles.input} placeholder="100.000" keyboardType="number-pad" value={value} onChangeText={(text)=> setValue(text)}/>
             </View>
             {showBalance &&
                 <View style={{ flexDirection: 'row', justifyContent: 'space-between', width: '100%' }}>

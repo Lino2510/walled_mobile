@@ -7,9 +7,12 @@ import {
   TouchableOpacity,
 } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import axios from 'axios';
 
 function Topup() {
   const [value, setValue] = useState("");
+  const [note, setNote] = useState('');
 
   // Fungsi untuk menambahkan titik setiap ribuan
   const formatNumber = (text) => {
@@ -18,9 +21,48 @@ function Topup() {
   };
 
   const handleInputChange = (text) => {
-    const formattedValue = formatNumber(text);
-    setValue(formattedValue);
+    // const formattedValue = formatNumber(text);
+    setValue(text);
   };
+
+  // fungsi untuk menangani aksi saat botton Topup ditekan
+  const handleTopUp = async () => {
+    if (!value || !note) {
+      Alert.alert('Error', 'Please fill in both amount and notes');
+    return;
+    }
+
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (token) {
+          console.log(token, 'token');
+          try {
+              console.log('topup!', value, note)
+              const response = await axios.post('https://walled-api.vercel.app/transactions/topup', {
+                  amount: value,
+                  description: note,
+              }, {
+                  headers: {
+                      Authorization: `Bearer ${token}`
+                  }
+              });  
+              if (response.status === 201) {
+                Alert.alert('Success', 'Transaction succesful!');
+                return
+            } else {
+                Alert.alert('Error', 'Transaction failed');
+               return
+            }
+        } catch (error) {
+            Alert.alert('Error', 'Failed to perform the transaction');
+            return
+        }
+    }
+} catch (error) {
+    console.log(error, 'gagal mengambil token!')
+}
+
+};
 
   return (
     <View
@@ -55,11 +97,13 @@ function Topup() {
 
         <View style={styles.notebox}>
           <Text style={styles.placeholder}>Notes</Text>
-          <TextInput style={styles.inputnote} />
+          <TextInput style={styles.inputnote}                         
+                      value={note}
+                      onChangeText={setNote}/>
         </View>
       </View>
 
-      <TouchableOpacity>
+      <TouchableOpacity onPress={handleTopUp}>
         <View style={styles.buttontopup}>
           <Text style={{ fontWeight: "bold", color: "#fff", fontSize: 18 }}>
             Top Up
@@ -120,7 +164,7 @@ const styles = StyleSheet.create({
   buttontopup: {
     paddingHorizontal: 20,
     paddingVertical: 12,
-    width: 397,
+    width: 350,
     alignItems: "center",
     backgroundColor: "#19918F",
     borderRadius: 10,
